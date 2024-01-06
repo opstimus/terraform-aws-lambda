@@ -1,1 +1,1 @@
-# terraform-module-template
+# Lambda function
