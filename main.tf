@@ -35,52 +35,24 @@ resource "aws_lambda_function" "main" {
   ]
 }
 
-resource "aws_iam_role" "scheduler_execution_role" {
-  count = var.schedule_expression != null ? 1 : 0
-  name  = "${var.project}-${var.environment}-${var.name}-scheduler"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "scheduler.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      },
-    ]
-  })
-
-  inline_policy {
-    name = "${var.project}-${var.environment}-${var.name}-scheduler"
-    policy = jsonencode({
-      Version = "2012-10-17",
-      Statement = [
-        {
-          Effect   = "Allow",
-          Action   = "lambda:InvokeFunction",
-          Resource = aws_lambda_function.main.arn
-        },
-      ]
-    })
-  }
+# Schedule job (optional)
+resource "aws_cloudwatch_event_rule" "schedule" {
+  count               = var.schedule_expression != null ? 1 : 0
+  name                = "${var.project}-${var.environment}-${var.name}-lambda"
+  description         = "Schedule for Lambda Function"
+  schedule_expression = var.schedule_expression
 }
 
+resource "aws_cloudwatch_event_target" "schedule" {
+  count = var.schedule_expression != null ? 1 : 0
+  rule  = aws_cloudwatch_event_rule.schedule.name
+  arn   = aws_lambda_function.main.arn
+}
 
-resource "aws_scheduler_schedule" "main" {
-  count      = var.schedule_expression != null ? 1 : 0
-  name       = "${var.project}-${var.environment}-${var.name}-lambda"
-  group_name = "default"
-
-  flexible_time_window {
-    mode = "OFF"
-  }
-
-  schedule_expression = var.schedule_expression
-
-  target {
-    arn      = aws_lambda_function.main.arn
-    role_arn = aws_iam_role.scheduler_execution_role[0].arn
-  }
+resource "aws_lambda_permission" "schedule" {
+  count         = var.schedule_expression != null ? 1 : 0
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.main.id
+  principal     = "events.amazonaws.com"
 }
