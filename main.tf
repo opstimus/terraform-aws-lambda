@@ -70,7 +70,7 @@ resource "aws_iam_role" "scheduler_execution_role" {
 
 resource "aws_scheduler_schedule" "main" {
   count      = var.schedule_expression != null ? 1 : 0
-  name       = "${var.project}-${var.environment}-${var.name}"
+  name       = "${var.project}-${var.environment}-${var.name}-lambda"
   group_name = "default"
 
   flexible_time_window {
