@@ -45,7 +45,7 @@ resource "aws_cloudwatch_event_rule" "schedule" {
 
 resource "aws_cloudwatch_event_target" "schedule" {
   count = var.schedule_expression != null ? 1 : 0
-  rule  = aws_cloudwatch_event_rule.schedule.name
+  rule  = aws_cloudwatch_event_rule.schedule[0].name
   arn   = aws_lambda_function.main.arn
 }
 
