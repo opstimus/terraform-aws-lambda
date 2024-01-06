@@ -81,6 +81,6 @@ resource "aws_scheduler_schedule" "main" {
 
   target {
     arn      = aws_lambda_function.main.arn
-    role_arn = aws_iam_role.scheduler_execution_role.arn
+    role_arn = aws_iam_role.scheduler_execution_role[0].arn
   }
 }
