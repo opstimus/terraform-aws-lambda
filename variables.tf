@@ -62,3 +62,9 @@ variable "additional_archive_excludes" {
   default     = []
   description = "Additional patterns to exclude from the archive"
 }
+
+variable "schedule_expression" {
+  type        = string
+  default     = null
+  description = "Define if Lambda should be invoked in a schedule"
+}

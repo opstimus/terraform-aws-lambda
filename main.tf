@@ -34,3 +34,53 @@ resource "aws_lambda_function" "main" {
     aws_cloudwatch_log_group.main
   ]
 }
+
+resource "aws_iam_role" "scheduler_execution_role" {
+  count = var.schedule_expression != null ? 1 : 0
+  name  = "${var.project}-${var.environment}-${var.name}-scheduler"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "scheduler.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      },
+    ]
+  })
+
+  inline_policy {
+    name = "${var.project}-${var.environment}-${var.name}-scheduler"
+    policy = jsonencode({
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect   = "Allow",
+          Action   = "lambda:InvokeFunction",
+          Resource = aws_lambda_function.main.arn
+        },
+      ]
+    })
+  }
+}
+
+
+resource "aws_scheduler_schedule" "main" {
+  count      = var.schedule_expression != null ? 1 : 0
+  name       = "${var.project}-${var.environment}-${var.name}"
+  group_name = "default"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = var.schedule_expression
+
+  target {
+    arn      = aws_lambda_function.main.arn
+    role_arn = aws_iam_role.scheduler_execution_role.arn
+  }
+}
