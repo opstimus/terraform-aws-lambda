@@ -68,3 +68,9 @@ variable "schedule_expression" {
   default     = null
   description = "Define if Lambda should be invoked in a schedule"
 }
+
+variable "sqs_queue_arn" {
+  type        = string
+  default     = null
+  description = "SQS queue arn to enable SQS trigger"
+}
