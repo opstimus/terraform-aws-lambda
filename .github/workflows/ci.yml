@@ -1,0 +1,16 @@
+name: Terraform CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: "Lint"
+    uses: opstimus/github-actions-terraform-lint/.github/workflows/lint.yml@v1
+
