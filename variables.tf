@@ -10,7 +10,7 @@ variable "environment" {
 
 variable "name" {
   type        = string
-  description = "Secret name | i.e mail-password"
+  description = "Function name"
 }
 
 variable "role_arn" {
