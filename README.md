@@ -36,6 +36,7 @@ This Terraform module deploys a Lambda function with optional triggers for AWS C
 | additional_archive_excludes| Additional patterns to exclude from the archive   | `list(string)` | `[]`                            | no       |
 | schedule_expression        | Schedule expression for Lambda invocation         | `string`    | `null`                             | no       |
 | sqs_queue_arn              | SQS queue ARN for triggering the Lambda function  | `string`    | `null`                             | no       |
+| layers                     | ARN of Lambda layers                              | `list(string)  | `[]`                            | no       |
 
 ## Outputs
 

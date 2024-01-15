@@ -23,6 +23,7 @@ resource "aws_lambda_function" "main" {
   runtime       = var.runtime
   timeout       = var.timeout
   memory_size   = var.memory_size
+  layers        = length(var.layers) > 0 ? var.layers : null
 
   source_code_hash = var.source_dir != null ? data.archive_file.main[0].output_base64sha256 : null
 

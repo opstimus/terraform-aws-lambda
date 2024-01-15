@@ -74,3 +74,8 @@ variable "sqs_queue_arn" {
   default     = null
   description = "SQS queue arn to enable SQS trigger"
 }
+
+variable "layers" {
+  type    = list(string)
+  default = []
+}
