@@ -75,6 +75,12 @@ variable "sqs_queue_arn" {
   description = "SQS queue arn to enable SQS trigger"
 }
 
+variable "sqs_batch_size" {
+  type        = number
+  default     = 10
+  description = "SQS batch size for a single Lambda invocation"
+}
+
 variable "layers" {
   type    = list(string)
   default = []
