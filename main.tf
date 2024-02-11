@@ -73,5 +73,6 @@ resource "aws_lambda_event_source_mapping" "dynamodb" {
   event_source_arn        = var.dynamodb_stream_arn
   function_name           = aws_lambda_function.main.arn
   batch_size              = var.dynamodb_stream_batch_size
+  starting_position       = "LATEST"
   function_response_types = ["ReportBatchItemFailures"]
 }
