@@ -81,6 +81,16 @@ variable "sqs_batch_size" {
   description = "SQS batch size for a single Lambda invocation"
 }
 
+variable "dynamodb_stream_arn" {
+  type    = string
+  default = null
+}
+
+variable "dynamodb_stream_batch_size" {
+  type    = number
+  default = 100
+}
+
 variable "layers" {
   type    = list(string)
   default = []
