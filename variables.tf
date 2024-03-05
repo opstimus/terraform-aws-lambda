@@ -91,6 +91,11 @@ variable "dynamodb_stream_batch_size" {
   default = 100
 }
 
+variable "dynamodb_stream_filter_pattern" {
+  type    = string
+  default = null
+}
+
 variable "layers" {
   type    = list(string)
   default = []

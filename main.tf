@@ -75,4 +75,12 @@ resource "aws_lambda_event_source_mapping" "dynamodb" {
   batch_size              = var.dynamodb_stream_batch_size
   starting_position       = "LATEST"
   function_response_types = ["ReportBatchItemFailures"]
+  dynamic "filter_criteria" {
+    for_each = var.dynamodb_stream_filter_pattern != null ? [1] : []
+    content {
+      filter {
+        pattern = var.dynamodb_stream_filter_pattern
+      }
+    }
+  }
 }
