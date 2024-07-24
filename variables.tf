@@ -87,7 +87,7 @@ variable "sqs_batch_size" {
   description = "SQS batch size for a single Lambda invocation"
 }
 
-variable "enable_dynanodb_stream_trigger" {
+variable "enable_dynamodb_stream_trigger" {
   type        = bool
   default     = false
   description = "Enable DynamoDB stream trigger"
