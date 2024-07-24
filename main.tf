@@ -60,7 +60,7 @@ resource "aws_lambda_permission" "schedule" {
 
 # SQS trigger (optional)
 resource "aws_lambda_event_source_mapping" "sqs" {
-  count                   = var.sqs_queue_arn != null ? 1 : 0
+  count                   = var.enable_sqs_trigger ? 1 : 0
   event_source_arn        = var.sqs_queue_arn
   function_name           = aws_lambda_function.main.arn
   batch_size              = var.sqs_batch_size
@@ -69,7 +69,7 @@ resource "aws_lambda_event_source_mapping" "sqs" {
 
 # DynamoDB Stream trigger (optional)
 resource "aws_lambda_event_source_mapping" "dynamodb" {
-  count                   = var.dynamodb_stream_arn != null ? 1 : 0
+  count                   = var.enable_dynanodb_stream_trigger ? 1 : 0
   event_source_arn        = var.dynamodb_stream_arn
   function_name           = aws_lambda_function.main.arn
   batch_size              = var.dynamodb_stream_batch_size
