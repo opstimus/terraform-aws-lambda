@@ -69,6 +69,12 @@ variable "schedule_expression" {
   description = "Define if Lambda should be invoked in a schedule"
 }
 
+variable "enable_sqs_trigger" {
+  type        = bool
+  default     = false
+  description = "Enable SQS trigger"
+}
+
 variable "sqs_queue_arn" {
   type        = string
   default     = null
@@ -81,6 +87,12 @@ variable "sqs_batch_size" {
   description = "SQS batch size for a single Lambda invocation"
 }
 
+variable "enable_dynamodb_stream_trigger" {
+  type        = bool
+  default     = false
+  description = "Enable DynamoDB stream trigger"
+}
+
 variable "dynamodb_stream_arn" {
   type    = string
   default = null
@@ -89,6 +101,11 @@ variable "dynamodb_stream_arn" {
 variable "dynamodb_stream_batch_size" {
   type    = number
   default = 100
+}
+
+variable "dynamodb_stream_filter_pattern" {
+  type    = string
+  default = null
 }
 
 variable "layers" {
