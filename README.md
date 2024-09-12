@@ -59,13 +59,13 @@ This Terraform module deploys an AWS Lambda function along with optional CloudWa
 
 ```hcl
 module "lambda_function" {
-  source      = "github.com/opstimus/terraform-aws-lambda?ref=v<RELEASE>"
+  source             = "github.com/opstimus/terraform-aws-lambda?ref=v<RELEASE>"
   
-  project     = "example-project"
-  environment = "dev"
-  name        = "example-function"
-  role_arn    = "arn:aws:iam::123456789012:role/lambda-role"
-  runtime     = "python3.8"
+  project            = "example-project"
+  environment        = "dev"
+  name               = "example-function"
+  role_arn           = "arn:aws:iam::123456789012:role/lambda-role"
+  runtime            = "python3.8"
 
   # Optional configurations
   log_retention_days = 14
