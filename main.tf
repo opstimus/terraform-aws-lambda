@@ -19,8 +19,9 @@ resource "aws_lambda_function" "main" {
   role          = var.role_arn
   filename      = var.source_dir != null ? "/tmp/${var.project}-${var.environment}-${var.name}.zip" : null
   image_uri     = var.image_uri != null ? var.image_uri : null
-  handler       = var.handler
-  runtime       = var.runtime
+  package_type  = var.image_uri != null ? "Image" : "Zip"
+  handler       = var.image_uri != null ? null : var.handler
+  runtime       = var.image_uri != null ? null : var.runtime
   timeout       = var.timeout
   memory_size   = var.memory_size
   layers        = length(var.layers) > 0 ? var.layers : null
