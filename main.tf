@@ -38,7 +38,7 @@ resource "aws_lambda_function" "main" {
       security_group_ids = var.security_group_ids
     }
   }
-  
+
   depends_on = [
     aws_cloudwatch_log_group.main
   ]
