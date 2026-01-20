@@ -2,7 +2,7 @@
 
 ## Description
 
-This Terraform module deploys an AWS Lambda function along with optional CloudWatch Logs, CloudWatch Events (for scheduling), SQS triggers, and DynamoDB stream triggers. It supports both ZIP-based and container image-based Lambda functions and allows extensive configuration options.
+This Terraform module deploys an AWS Lambda function along with optional CloudWatch Logs, CloudWatch Events (for scheduling), SQS triggers, and DynamoDB stream triggers. It supports both ZIP-based and container image-based Lambda functions, VPC configuration, and allows extensive configuration options.
 
 ## Requirements
 
@@ -44,6 +44,8 @@ This Terraform module deploys an AWS Lambda function along with optional CloudWa
 | dynamodb_stream_batch_size       | DynamoDB stream batch size for a single Lambda invocation | `number`      | `100`                                       | no       |
 | dynamodb_stream_filter_pattern   | Filter pattern for the DynamoDB stream             | `string`      | `null`                                      | no       |
 | layers                           | List of Lambda layers to attach                    | `list(string)`| `[]`                                        | no       |
+| subnet_ids                       | List of subnet IDs for VPC configuration           | `list(string)`| `null`                                      | no       |
+| security_group_ids               | List of security group IDs for VPC configuration  | `list(string)`| `null`                                      | no       |
 
 ## Outputs
 
@@ -60,7 +62,7 @@ This Terraform module deploys an AWS Lambda function along with optional CloudWa
 ```hcl
 module "lambda_function" {
   source             = "github.com/opstimus/terraform-aws-lambda?ref=v<RELEASE>"
-  
+
   project            = "example-project"
   environment        = "dev"
   name               = "example-function"
@@ -76,5 +78,10 @@ module "lambda_function" {
     ENV_VAR_1 = "value1"
     ENV_VAR_2 = "value2"
   }
+
+  # VPC Configuration (optional - both subnet_ids and security_group_ids must be provided together)
+  # Note: Lambda execution role must have permissions to create/manage ENIs
+  subnet_ids         = ["subnet-12345", "subnet-67890"]
+  security_group_ids = ["sg-abc123"]
 }
 ```

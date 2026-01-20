@@ -112,3 +112,15 @@ variable "layers" {
   type    = list(string)
   default = []
 }
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = null
+  description = "List of subnet IDs for VPC configuration. If provided along with security_group_ids, Lambda will be configured to run in VPC"
+}
+
+variable "security_group_ids" {
+  type        = list(string)
+  default     = null
+  description = "List of security group IDs for VPC configuration. If provided along with subnet_ids, Lambda will be configured to run in VPC"
+}
