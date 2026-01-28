@@ -31,6 +31,14 @@ resource "aws_lambda_function" "main" {
     variables = var.envars
   }
 
+  dynamic "vpc_config" {
+    for_each = var.subnet_ids != null && var.security_group_ids != null ? [1] : []
+    content {
+      subnet_ids         = var.subnet_ids
+      security_group_ids = var.security_group_ids
+    }
+  }
+
   depends_on = [
     aws_cloudwatch_log_group.main
   ]
