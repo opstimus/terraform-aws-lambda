@@ -12,4 +12,4 @@ on:
 jobs:
   lint:
     name: "Lint"
-    uses: opstimus/github-actions-terraform/.github/workflows/lint.yml@v1.1.0
+    uses: opstimus/github-actions-terraform/.github/workflows/lint.yml@v1
