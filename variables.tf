@@ -13,6 +13,23 @@ variable "name" {
   description = "Function name"
 }
 
+variable "deployment_mode" {
+  description = "How to deploy the Lambda. One of: 'filename', 's3', 'image'"
+  type        = string
+  default     = "filename"
+
+  validation {
+    condition     = contains(["filename", "s3", "image"], var.deployment_mode)
+    error_message = "deployment_mode must be one of: filename, s3, image."
+  }
+}
+
+variable "bucket_name" {
+  type        = string
+  default     = null
+  description = "S3 bucket name for deployment package. Required if deployment_mode is 's3'"
+}
+
 variable "role_arn" {
   type = string
 }
