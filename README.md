@@ -2,7 +2,7 @@
 
 ## Description
 
-This Terraform module deploys an AWS Lambda function along with optional CloudWatch Logs, CloudWatch Events (for scheduling), SQS triggers, and DynamoDB stream triggers. It supports both ZIP-based and container image-based Lambda functions, VPC configuration, and allows extensive configuration options.
+This Terraform module deploys an AWS Lambda function along with optional CloudWatch Logs, CloudWatch Events (for scheduling), SQS triggers, and DynamoDB stream triggers. It supports three deployment modes: local ZIP files, S3-based deployment packages, and container images. It also supports VPC configuration and extensive customization options.
 
 ## Requirements
 
@@ -26,6 +26,8 @@ This Terraform module deploys an AWS Lambda function along with optional CloudWa
 | environment                      | Environment name                                   | `string`      | `-`                                         | yes      |
 | name                             | Function name                                      | `string`      | `-`                                         | yes      |
 | role_arn                         | ARN of the IAM role that the Lambda function assumes | `string`      | `-`                                         | yes      |
+| deployment_mode                  | Deployment mode for the Lambda function ('filename', 's3', or 'image') | `string`      | `"filename"`                               | no       |
+| bucket_name                      | S3 bucket name for deployment package (required if deployment_mode is 's3') | `string`      | `null`                                      | no       |
 | handler                          | Lambda function handler (for ZIP-based functions)  | `string`      | `"lambda_function.lambda_handler"`          | no       |
 | runtime                          | Runtime for the Lambda function                    | `string`      | `-`                                         | yes      |
 | timeout                          | Maximum execution time for the function (in seconds) | `number`      | `300`                                       | no       |
@@ -57,17 +59,18 @@ This Terraform module deploys an AWS Lambda function along with optional CloudWa
 
 ## Usage examples
 
-### Basic Usage
+### Basic Usage (Local ZIP File)
 
 ```hcl
 module "lambda_function" {
   source             = "github.com/opstimus/terraform-aws-lambda?ref=v<RELEASE>"
-
   project            = "example-project"
   environment        = "dev"
   name               = "example-function"
   role_arn           = "arn:aws:iam::123456789012:role/lambda-role"
   runtime            = "python3.8"
+  deployment_mode    = "filename"
+  source_dir         = "./lambda_code"
 
   # Optional configurations
   log_retention_days = 14
@@ -85,3 +88,60 @@ module "lambda_function" {
   security_group_ids = ["sg-abc123"]
 }
 ```
+
+### S3 Deployment
+
+```hcl
+module "lambda_function" {
+  source             = "github.com/opstimus/terraform-aws-lambda?ref=v<RELEASE>"
+  project            = "example-project"
+  environment        = "dev"
+  name               = "example-function"
+  role_arn           = "arn:aws:iam::123456789012:role/lambda-role"
+  runtime            = "python3.8"
+  deployment_mode    = "s3"
+  bucket_name        = "my-lambda-deployments"
+  source_dir         = "./lambda_code"
+  handler            = "app.handler"
+  timeout            = 120
+  memory_size        = 256
+}
+```
+
+### Container Image Deployment
+
+```hcl
+module "lambda_function" {
+  source             = "github.com/opstimus/terraform-aws-lambda?ref=v<RELEASE>"
+  project            = "example-project"
+  environment        = "dev"
+  name               = "example-function"
+  role_arn           = "arn:aws:iam::123456789012:role/lambda-role"
+  deployment_mode    = "image"
+  image_uri          = "123456789012.dkr.ecr.us-east-1.amazonaws.com/my-lambda:latest"
+  timeout            = 120
+  memory_size        = 256
+}
+```
+
+## Important Considerations
+
+### Deployment Mode Considerations
+
+- **filename** (default): Use this for local development and smaller Lambda functions. The module automatically creates a ZIP archive from your source directory. Best for rapid iteration.
+- **s3**: Use this for CI/CD pipelines and larger deployments. The module creates a ZIP archive and uploads it to your S3 bucket, then deploys from S3. Provides better versioning and sharing capabilities.
+- **image**: Use this for containerized Lambda functions. When using this mode, `handler` and `runtime` parameters are not required and will be ignored. The container image must be pushed to ECR beforehand.
+
+### S3 Deployment Details
+
+- The S3 bucket specified in `bucket_name` must already exist and be accessible from your AWS account.
+- The module will automatically create a ZIP archive from your source directory and upload it to the bucket under the path: `lambda-deployments/{environment}-{name}/{sha256_hash}.zip`
+- The SHA256 hash ensures different versions of your code are tracked separately in S3, enabling safe rollbacks and version management.
+- Ensure your IAM role has `s3:PutObject` permissions on the specified bucket.
+
+### Source Directory Requirements
+
+- For `filename` (ZIP) and `s3` deployment modes, `source_dir` is required and must point to a valid directory containing your Lambda function code.
+- The following patterns are automatically excluded from the archive: `.git`, `.terraform`, `.gitignore`, `iac`, and `__pycache__`.
+- Additional exclusion patterns can be specified using the `additional_archive_excludes` parameter (e.g., `node_modules`, `.env` files, test directories).
+- For `image` mode, `source_dir` should be omitted or set to `null` as the code is already packaged in the container image.

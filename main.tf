@@ -1,5 +1,11 @@
+locals {
+  use_filename = var.deployment_mode == "filename"
+  use_s3       = var.deployment_mode == "s3"
+  use_image    = var.deployment_mode == "image"
+}
+
 data "archive_file" "main" {
-  count       = var.source_dir != null ? 1 : 0
+  count       = local.use_filename || local.use_s3 ? 1 : 0
   type        = "zip"
   source_dir  = var.source_dir
   output_path = "/tmp/${var.project}-${var.environment}-${var.name}.zip"
@@ -9,23 +15,33 @@ data "archive_file" "main" {
   )
 }
 
+resource "aws_s3_object" "main_zip" {
+  count  = local.use_s3 ? 1 : 0
+  bucket = var.bucket_name
+  key    = "lambda-deployments/${var.environment}-${var.name}/${data.archive_file.main[0].output_sha256}.zip"
+  source = data.archive_file.main[0].output_path
+  etag   = data.archive_file.main[0].output_md5
+}
+
 resource "aws_cloudwatch_log_group" "main" {
   name              = "/aws/lambda/${var.project}-${var.environment}-${var.name}"
   retention_in_days = var.log_retention_days
 }
 
 resource "aws_lambda_function" "main" {
-  function_name = "${var.project}-${var.environment}-${var.name}"
-  role          = var.role_arn
-  filename      = var.source_dir != null ? "/tmp/${var.project}-${var.environment}-${var.name}.zip" : null
-  image_uri     = var.image_uri != null ? var.image_uri : null
-  handler       = var.handler
-  runtime       = var.runtime
-  timeout       = var.timeout
-  memory_size   = var.memory_size
-  layers        = length(var.layers) > 0 ? var.layers : null
-
-  source_code_hash = var.source_dir != null ? data.archive_file.main[0].output_base64sha256 : null
+  function_name    = "${var.project}-${var.environment}-${var.name}"
+  role             = var.role_arn
+  package_type     = local.use_image ? "Image" : "Zip"
+  filename         = local.use_filename ? "/tmp/${var.project}-${var.environment}-${var.name}.zip" : null
+  s3_bucket        = local.use_s3 ? var.bucket_name : null
+  s3_key           = local.use_s3 ? aws_s3_object.main_zip[0].key : null
+  image_uri        = local.use_image ? var.image_uri : null
+  source_code_hash = local.use_image ? null : data.archive_file.main[0].output_base64sha256
+  handler          = local.use_image ? null : var.handler
+  runtime          = local.use_image ? null : var.runtime
+  timeout          = var.timeout
+  memory_size      = var.memory_size
+  layers           = length(var.layers) > 0 ? var.layers : null
 
   environment {
     variables = var.envars
@@ -40,7 +56,8 @@ resource "aws_lambda_function" "main" {
   }
 
   depends_on = [
-    aws_cloudwatch_log_group.main
+    aws_cloudwatch_log_group.main,
+    aws_s3_object.main_zip
   ]
 }
 
